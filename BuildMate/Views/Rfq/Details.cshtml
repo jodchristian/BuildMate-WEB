@@ -1,0 +1,21 @@
+﻿@model Buildmate.Models.RfqRequest
+@{
+    ViewData["Title"] = "RFQ Details";
+    Layout = "_Layout";
+}
+
+<h2 class="page-title">RFQ Details</h2>
+<p class="page-subtitle">@Model.Reference</p>
+
+<div class="panel">
+    <table class="details-table">
+        <tr><td><strong>Title</strong></td><td>@Model.Title</td></tr>
+        <tr><td><strong>Buyer</strong></td><td>@Model.Buyer</td></tr>
+        <tr><td><strong>Category</strong></td><td>@Model.Category</td></tr>
+        <tr><td><strong>Posted Date</strong></td><td>@Model.PostedDate.ToString("dd MMM yyyy")</td></tr>
+        <tr><td><strong>Valid Until</strong></td><td>@Model.ValidTill.ToString("dd MMM yyyy") (@Model.DaysLeft days left)</td></tr>
+        <tr><td><strong>Items</strong></td><td>@Model.ItemsCount</td></tr>
+        <tr><td><strong>Status</strong></td><td><span class="badge-status @Model.Status.ToLower()">@Model.Status</span></td></tr>
+    </table>
+    <a href="/Rfq/Index" class="btn-apply" style="margin-top:16px; display:inline-block;">← Back to RFQ Requests</a>
+</div>

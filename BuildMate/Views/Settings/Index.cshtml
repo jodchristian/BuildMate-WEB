@@ -1,0 +1,150 @@
+﻿@model Buildmate.Models.UserSettings
+@{
+    ViewData["Title"] = "Settings";
+    Layout = "_Layout";
+    var bankAccounts = ViewBag.BankAccounts as List<Buildmate.Models.BankAccount>;
+    var primaryAccount = bankAccounts?.FirstOrDefault(b => b.IsPrimary);
+    var otherAccounts = bankAccounts?.Where(b => !b.IsPrimary).ToList() ?? new List<Buildmate.Models.BankAccount>();
+}
+
+<h2 class="page-title">Account Settings</h2>
+<p class="page-subtitle">Manage your company information and account settings.</p>
+
+<div class="settings-grid">
+    <!-- LEFT COLUMN -->
+    <div>
+        <div class="panel">
+            <h4 class="section-title-orange">Account Information</h4>
+            <p class="section-sub">Update your account details and manage your login credentials.</p>
+            <form asp-action="UpdateAccount" method="post">
+                <input type="hidden" asp-for="Id" />
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>First Name</label>
+                        <input asp-for="FirstName" class="form-input" />
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name</label>
+                        <input asp-for="LastName" class="form-input" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input asp-for="Email" class="form-input" />
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input asp-for="PhoneNumber" class="form-input" />
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Language Preference</label>
+                        <input asp-for="LanguagePreference" class="form-input" />
+                    </div>
+                    <div class="form-group">
+                        <label>Time Zone</label>
+                        <input asp-for="TimeZone" class="form-input" />
+                    </div>
+                </div>
+                <div class="form-actions" style="justify-content:flex-start;">
+                    <button type="submit" class="btn-apply">Save Changes</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="panel">
+            <h4 class="section-title-orange">Two-Factor Authentication (2FA)</h4>
+            <p class="section-sub">Add an extra layer of security to your account.</p>
+            <table class="info-table">
+                <tr>
+                    <td class="info-label">Status</td>
+                    <td><span class="badge-status @(Model.TwoFactorEnabled ? "delivered" : "cancelled")">@(Model.TwoFactorEnabled ? "Enabled" : "Disabled")</span></td>
+                </tr>
+                <tr>
+                    <td class="info-label">Authentication App</td>
+                    <td>@Model.AuthenticatorApp <a href="#" class="btn-details" style="float:right;">Manage</a></td>
+                </tr>
+                <tr>
+                    <td class="info-label">Backup Codes</td>
+                    <td>You have @Model.UnusedBackupCodes unused backup codes <a href="#" class="btn-details" style="float:right;">View</a></td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="panel">
+            <h4 class="section-title-orange">Bank Account Details</h4>
+            <p class="section-sub">Manage your company bank accounts for your payouts and refunds.</p>
+            @if (primaryAccount != null)
+            {
+                <div class="bank-primary-row">
+                    <i class="bi bi-bank"></i>
+                    <div>
+                        <span class="primary-tag">Primary Account</span>
+                        <strong>@primaryAccount.BankName</strong><br />
+                        <small class="muted">@primaryAccount.AccountType</small>
+                    </div>
+                    <div class="bank-col">
+                        <small class="muted">Account Name</small>
+                        <div>@primaryAccount.AccountName</div>
+                    </div>
+                    <div class="bank-col">
+                        <small class="muted">Account Number</small>
+                        <div>@primaryAccount.AccountNumber</div>
+                    </div>
+                    <span class="badge-status delivered">@primaryAccount.Status</span>
+                </div>
+            }
+            <a href="#" class="add-tier-link">+ Add New Account</a>
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+        <div class="panel">
+            <h4 class="section-title-orange">Change Password</h4>
+            <p class="section-sub">Change your password into something more secure.</p>
+            <div class="password-card">
+                <strong class="section-title-orange">Change Password</strong>
+                <form asp-action="UpdatePassword" method="post">
+                    <input type="hidden" name="id" value="@Model.Id" />
+                    <div class="form-group full-width">
+                        <label>Current Password</label>
+                        <input type="password" name="currentPassword" class="form-input" />
+                    </div>
+                    <div class="form-group full-width">
+                        <label>New Password</label>
+                        <input type="password" name="newPassword" class="form-input" />
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Confirm New Password</label>
+                        <input type="password" name="confirmPassword" class="form-input" />
+                    </div>
+                    <button type="submit" class="btn-apply" style="width:100%; justify-content:center; margin-top:8px;">Update Password</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h4 class="section-title-orange">Other Bank Accounts</h4>
+            <table class="rfq-table">
+                <thead>
+                    <tr><th>Bank Name</th><th>Account Name</th><th>Account Number</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var acc in otherAccounts)
+                    {
+                        <tr>
+                            <td class="link-text">@acc.BankName</td>
+                            <td class="link-text">@acc.AccountName</td>
+                            <td class="link-text">@acc.AccountNumber</td>
+                            <td><span class="badge-status delivered">@acc.Status</span></td>
+                            <td><a href="#" class="btn-edit"><i class="bi bi-pencil"></i></a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,22 @@
+﻿@model Buildmate.Models.Order
+@{
+    ViewData["Title"] = "Order Details";
+    Layout = "_Layout";
+}
+
+<h2 class="page-title">Order Details</h2>
+<p class="page-subtitle">@Model.OrderNumber</p>
+
+<div class="panel">
+    <table class="details-table">
+        <tr><td><strong>Order No.</strong></td><td>@Model.OrderNumber</td></tr>
+        <tr><td><strong>Project</strong></td><td>@Model.ProjectName</td></tr>
+        <tr><td><strong>Buyer</strong></td><td>@Model.BuyerName</td></tr>
+        <tr><td><strong>Order Date</strong></td><td>@Model.OrderDate.ToString("dd MMM yyyy, h:mm tt")</td></tr>
+        <tr><td><strong>Total Amount</strong></td><td>₱@Model.Amount.ToString("N2")</td></tr>
+        <tr><td><strong>Items</strong></td><td>@Model.ItemsCount</td></tr>
+        <tr><td><strong>Status</strong></td><td><span class="badge-status @Model.Status.Replace(" ", "").ToLower()">@Model.Status</span></td></tr>
+        <tr><td><strong>Expected Delivery</strong></td><td>@Model.ExpectedDelivery.ToString("dd MMM yyyy") (@Model.DeliveryStatusText)</td></tr>
+    </table>
+    <a href="/Order/Index" class="btn-apply" style="margin-top:16px; display:inline-block;">← Back to Orders</a>
+</div>

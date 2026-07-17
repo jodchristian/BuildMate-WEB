@@ -1,0 +1,131 @@
+﻿@model Buildmate.Models.RfqListViewModel
+@{
+    ViewData["Title"] = "RFQ Requests";
+    Layout = "_Layout";
+}
+
+<h2 class="page-title">RFQ Requests</h2>
+<p class="page-subtitle">View and respond to all requests for quotation from buyers.</p>
+
+<!-- STAT CARDS -->
+<div class="stat-cards">
+    <div class="stat-card blue">
+        <div>
+            <small>New</small>
+            <h3>@Model.NewCount</h3>
+            <span>New RFQs</span>
+        </div>
+        <img src="~/images/newreq.png" class="stat-icon-img" />
+    </div>
+    <div class="stat-card yellow">
+        <div>
+            <small>Responded</small>
+            <h3>@Model.RespondedCount</h3>
+            <span>RFQs</span>
+        </div>
+        <img src="~/images/quotsent.png" class="stat-icon-img" />
+    </div>
+    <div class="stat-card green">
+        <div>
+            <small>Closed</small>
+            <h3>@Model.ClosedCount</h3>
+            <span>RFQs</span>
+        </div>
+        <img src="~/images/orderreceive.png" class="stat-icon-img" />
+    </div>
+    <div class="stat-card purple">
+        <div>
+            <small>Total RFQs</small>
+            <h3>@Model.TotalCount</h3>
+            <span>All Time</span>
+        </div>
+        <img src="~/images/totalsales.png" class="stat-icon-img" />
+    </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="panel filter-panel">
+    <form method="get" asp-action="Index" class="filter-form">
+        <input type="hidden" name="tab" value="@Model.CurrentTab" />
+        <div class="filter-group search-wrapper">
+            <div class="search-box">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" name="search" value="@Model.SearchTerm" placeholder="Search by RFQ title or buyer..." />
+            </div>
+        </div>
+        <div class="filter-group">
+            <label>Status</label>
+            <select name="status">
+                <option value="">All</option>
+                <option value="New" selected="@(Model.StatusFilter == "New")">New</option>
+                <option value="Responded" selected="@(Model.StatusFilter == "Responded")">Responded</option>
+                <option value="Closed" selected="@(Model.StatusFilter == "Closed")">Closed</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Category</label>
+            <select name="category">
+                <option value="">All</option>
+                <option value="Electrical" selected="@(Model.CategoryFilter == "Electrical")">Electrical</option>
+                <option value="Plumbing" selected="@(Model.CategoryFilter == "Plumbing")">Plumbing</option>
+                <option value="Roofing" selected="@(Model.CategoryFilter == "Roofing")">Roofing</option>
+            </select>
+        </div>
+        <a href="/Rfq/Index" class="btn-clear">Clear</a>
+        <button type="submit" class="btn-apply">Apply Filters</button>
+    </form>
+</div>
+
+<!-- TABLE PANEL -->
+<div class="panel">
+    <div class="tabs">
+        <a href="@Url.Action("Index", new { tab = "All", search = Model.SearchTerm })" class="tab @(Model.CurrentTab == "All" ? "active" : "")">All (@Model.TotalCount)</a>
+        <a href="@Url.Action("Index", new { tab = "New", search = Model.SearchTerm })" class="tab @(Model.CurrentTab == "New" ? "active" : "")">New (@Model.NewCount)</a>
+        <a href="@Url.Action("Index", new { tab = "Responded", search = Model.SearchTerm })" class="tab @(Model.CurrentTab == "Responded" ? "active" : "")">Responded (@Model.RespondedCount)</a>
+        <a href="@Url.Action("Index", new { tab = "Closed", search = Model.SearchTerm })" class="tab @(Model.CurrentTab == "Closed" ? "active" : "")">Closed (@Model.ClosedCount)</a>
+    </div>
+
+    <table class="rfq-table full-table">
+        <thead>
+            <tr>
+                <th>RFQ Reference</th>
+                <th>RFQ Title</th>
+                <th>Buyer</th>
+                <th>Category</th>
+                <th>Items</th>
+                <th>Valid Until</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rfq in Model.AllRfqs)
+            {
+                <tr>
+                    <td>
+                        <strong>@rfq.Reference</strong><br />
+                        <small class="muted">@rfq.PostedDate.ToString("dd MMM yyyy")</small>
+                    </td>
+                    <td>@rfq.Title</td>
+                    <td>@rfq.Buyer</td>
+                    <td>@rfq.Category</td>
+                    <td>@rfq.ItemsCount</td>
+                    <td>
+                        @rfq.ValidTill.ToString("dd MMM yyyy")<br />
+                        <small class="days-left">@rfq.DaysLeft days left</small>
+                    </td>
+                    <td>
+                        <span class="badge-status @rfq.Status.ToLower()">@rfq.Status</span>
+                    </td>
+                    <td>
+                        <a href="@Url.Action("Details", new { id = rfq.Id })" class="btn-details">View Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="table-footer">
+        Showing @Model.AllRfqs.Count of @Model.TotalCount quotations
+    </div>
+</div>

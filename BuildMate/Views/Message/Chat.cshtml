@@ -1,0 +1,146 @@
+﻿@model Buildmate.Models.MessageThread
+@{
+    ViewData["Title"] = Model.SenderName;
+    Layout = "_Layout";
+    var messages = ViewBag.Messages as List<Buildmate.Models.ChatMessage>;
+}
+
+<a href="@Url.Action("Index")" class="back-link">
+    <i class="bi bi-arrow-left"></i> Back to Messages
+</a>
+
+<div class="chat-panel">
+    <!-- CHAT HEADER -->
+    <div class="chat-header">
+        <div class="message-avatar" style="background:@Model.AvatarColor; width:44px; height:44px;">
+            @Model.SenderInitials
+            @if (Model.IsOnline)
+            {
+                <span class="online-dot"></span>
+            }
+        </div>
+        <div class="chat-header-info">
+            <strong>@Model.SenderName</strong>
+            <small class="@(Model.IsOnline ? "chat-online-text" : "chat-offline-text")">@(Model.IsOnline ? "Online" : "Offline")</small>
+        </div>
+        <div class="chat-header-actions">
+            <i class="bi bi-telephone"></i>
+            <i class="bi bi-three-dots-vertical"></i>
+        </div>
+    </div>
+
+    <!-- ORDER CONTEXT CARD -->
+    <div class="chat-order-card">
+        <div class="chat-order-icon"><i class="bi bi-file-earmark-text"></i></div>
+        <div class="chat-order-info">
+            <strong>@Model.RelatedOrder</strong>
+            <small>@Model.ProjectName</small>
+        </div>
+        <div class="chat-order-status">
+            Status: <span class="status-highlight">@Model.OrderStatus</span>
+        </div>
+        <a href="#" class="view-order-link">View order ></a>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="chat-messages">
+        <div class="chat-date-divider"><span>Today</span></div>
+
+        @if (messages != null)
+        {
+            @foreach (var m in messages)
+            {
+                if (m.IsFromMe)
+                {
+                    <div class="chat-bubble-row from-me">
+                        <div class="chat-bubble mine">
+                            @if (!string.IsNullOrEmpty(m.AttachmentPath))
+                            {
+                                if (m.IsImage)
+                                {
+                                    <a href="@m.AttachmentPath" download="@m.AttachmentFileName" class="chat-image-link">
+                                        <img src="@m.AttachmentPath" class="chat-attachment-img" />
+                                        <span class="chat-download-hint"><i class="bi bi-download"></i> Download</span>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="@m.AttachmentPath" download="@m.AttachmentFileName" class="chat-file-card">
+                                        <i class="bi bi-file-earmark-arrow-down"></i>
+                                        <span>@m.AttachmentFileName</span>
+                                    </a>
+                                }
+                            }
+                            @if (!string.IsNullOrWhiteSpace(m.Content))
+                            {
+                                <div>@m.Content</div>
+                            }
+                            <div class="chat-bubble-time">@m.Timestamp.ToString("h:mm tt")</div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="chat-bubble-row from-them">
+                        <div class="message-avatar small" style="background:@Model.AvatarColor;">@Model.SenderInitials</div>
+                        <div class="chat-bubble theirs">
+                            @if (!string.IsNullOrEmpty(m.AttachmentPath))
+                            {
+                                if (m.IsImage)
+                                {
+                                    <a href="@m.AttachmentPath" download="@m.AttachmentFileName" class="chat-image-link">
+                                        <img src="@m.AttachmentPath" class="chat-attachment-img" />
+                                        <span class="chat-download-hint"><i class="bi bi-download"></i> Download</span>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="@m.AttachmentPath" download="@m.AttachmentFileName" class="chat-file-card">
+                                        <i class="bi bi-file-earmark-arrow-down"></i>
+                                        <span>@m.AttachmentFileName</span>
+                                    </a>
+                                }
+                            }
+                            @if (!string.IsNullOrWhiteSpace(m.Content))
+                            {
+                                <div>@m.Content</div>
+                            }
+                            <div class="chat-bubble-time">@m.Timestamp.ToString("h:mm tt")</div>
+                        </div>
+                    </div>
+                }
+            }
+        }
+    </div>
+
+    <!-- FILE PREVIEW (shown before sending) -->
+    <div id="filePreviewBar" class="file-preview-bar" style="display:none;">
+        <i class="bi bi-paperclip"></i>
+        <span id="filePreviewName"></span>
+        <a href="#" onclick="clearFileSelection(); return false;" class="file-preview-remove"><i class="bi bi-x"></i></a>
+    </div>
+
+    <!-- INPUT -->
+    <form asp-action="SendMessage" method="post" class="chat-input-row" enctype="multipart/form-data">
+        <input type="hidden" name="threadId" value="@Model.Id" />
+        <label class="chat-attach-icon" style="cursor:pointer;">
+            <i class="bi bi-paperclip"></i>
+            <input type="file" name="attachment" id="attachmentInput" style="display:none;" onchange="showFileSelection(event)" />
+        </label>
+        <input type="text" name="content" class="chat-text-input" placeholder="Type a message..." autocomplete="off" />
+        <button type="submit" class="chat-send-btn"><i class="bi bi-send-fill"></i></button>
+    </form>
+</div>
+
+<script>
+    function showFileSelection(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        document.getElementById('filePreviewName').textContent = file.name;
+        document.getElementById('filePreviewBar').style.display = 'flex';
+    }
+    function clearFileSelection() {
+        document.getElementById('attachmentInput').value = '';
+        document.getElementById('filePreviewBar').style.display = 'none';
+    }
+</script>

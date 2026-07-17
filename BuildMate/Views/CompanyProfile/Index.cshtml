@@ -1,0 +1,150 @@
+﻿@model Buildmate.Models.CompanyProfile
+@{
+    ViewData["Title"] = "Company Profile";
+    Layout = "_Layout";
+    var documents = ViewBag.Documents as List<Buildmate.Models.CompanyDocument>;
+}
+
+<div class="page-header-row">
+    <div>
+        <h2 class="page-title">Company Profile</h2>
+        <p class="page-subtitle">Manage your company information and account settings.</p>
+    </div>
+    <a href="#" onclick="openProfilePanel('@Url.Action("Edit")'); return false;" class="btn-apply"><i class="bi bi-pencil"></i> Edit Profile</a>
+</div>
+
+<div class="profile-grid">
+    <!-- LEFT COLUMN -->
+    <div>
+        <div class="panel profile-main-card">
+            <div class="profile-top-row">
+                <img src="~/images/@Model.LogoFile" class="profile-logo" />
+                <div>
+                    <h3>@Model.CompanyName</h3>
+                    <div class="profile-badge-row">
+                        @if (Model.IsVerified)
+                        {
+                            <span class="verified-badge"><i class="bi bi-patch-check-fill"></i> Verified Supplier</span>
+                        }
+                        <span class="muted">| Since @Model.SinceDate.ToString("MMMM yyyy")</span>
+                    </div>
+                    <p class="profile-desc">@Model.ShortDescription</p>
+                    <div class="profile-contact-line"><i class="bi bi-geo-alt"></i> @Model.Address</div>
+                    <div class="profile-contact-row">
+                        <span><i class="bi bi-telephone"></i> @Model.Phone</span>
+                        <span><i class="bi bi-envelope"></i> @Model.Email</span>
+                        <span><i class="bi bi-globe"></i> @Model.Website</span>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-clear" style="margin-top:12px;"><i class="bi bi-camera"></i> Change Logo</button>
+        </div>
+
+        <!-- STAT CARDS (3 columns) -->
+        <div class="profile-stat-row">
+            <div class="panel profile-stat">
+                <div class="stat-icon-wrapper" style="position: static;"><img src="~/images/totalcompany.png" /></div>
+                <h3>@Model.TotalOrders</h3>
+                <small>Total Orders</small>
+                <span class="muted-sub">All time</span>
+            </div>
+            <div class="panel profile-stat">
+                <div class="stat-icon-wrapper" style="position: static;"><img src="~/images/ratings.png" /></div>
+                <h3>@Model.AverageRating.ToString("0.0") / 5</h3>
+                <small>Average Rating</small>
+                <span class="muted-sub">Based on @Model.ReviewsCount reviews</span>
+            </div>
+            <div class="panel profile-stat">
+                <div class="stat-icon-wrapper" style="position: static;"><img src="~/images/responserate.png" /></div>
+                <h3>@Model.ResponseRate%</h3>
+                <small>Response Rate</small>
+                <span class="muted-sub">This month</span>
+            </div>
+        </div>
+
+        <!-- COMPANY INFORMATION -->
+        <div class="panel">
+            <h4 class="section-title-orange">Company Information</h4>
+            <strong>About Company</strong>
+            <p class="about-text">@Model.AboutCompany</p>
+
+            <table class="info-table">
+                <tr><td class="info-label">Company Name</td><td>@Model.CompanyName</td></tr>
+                <tr><td class="info-label">Business Type</td><td>@Model.BusinessType</td></tr>
+                <tr><td class="info-label">Year Established</td><td>@Model.YearEstablished</td></tr>
+                <tr><td class="info-label">Company Size</td><td>@Model.CompanySize</td></tr>
+                <tr>
+                    <td class="info-label">Main Categories</td>
+                    <td>
+                        @foreach (var cat in Model.MainCategoriesList)
+                        {
+                            <span class="category-chip">@cat</span>
+                        }
+                    </td>
+                </tr>
+                <tr><td class="info-label">Service Areas</td><td>@Model.ServiceAreas</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div>
+        <div class="panel">
+            <h4>Business Details</h4>
+            <table class="info-table">
+                <tr><td class="info-label">DTI Registration No.</td><td>@Model.DtiRegNo</td></tr>
+                <tr><td class="info-label">Business Permit No.</td><td>@Model.BusinessPermitNo</td></tr>
+                <tr><td class="info-label">TIN</td><td>@Model.Tin</td></tr>
+                <tr><td class="info-label">VAT Registered</td><td><span class="badge-status delivered">@(Model.VatRegistered ? "Yes" : "No")</span></td></tr>
+                <tr><td class="info-label">Business Address</td><td>@Model.Address</td></tr>
+            </table>
+            <a href="#" class="btn-clear" style="display:block; text-align:center; margin-top:10px;">View All Details</a>
+        </div>
+
+        <div class="panel">
+            <h4>Documents</h4>
+            @if (documents != null)
+            {
+                @foreach (var doc in documents)
+                {
+                    <div class="doc-row">
+                        <div class="doc-color-tag" style="background: @doc.ColorTag;"></div>
+                        <div class="doc-info">
+                            <strong>@doc.FileName</strong>
+                            <small>Uploaded on @doc.UploadedDate.ToString("MMM d, yyyy")</small>
+                        </div>
+                        <a href="#" class="btn-details">View</a>
+                    </div>
+                }
+            }
+            <label class="upload-doc-box">
+                <input type="file" style="display:none;" />
+                <i class="bi bi-upload"></i> Upload New Document
+            </label>
+        </div>
+    </div>
+</div>
+
+<div id="profilePanelContainer"></div>
+
+<script>
+    function openProfilePanel(url) {
+        fetch(url)
+            .then(res => res.text())
+            .then(html => {
+                const container = document.getElementById('profilePanelContainer');
+                container.innerHTML = html;
+                const scripts = container.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    if (oldScript.src) newScript.src = oldScript.src;
+                    else newScript.textContent = oldScript.textContent;
+                    document.body.appendChild(newScript);
+                    oldScript.remove();
+                });
+            });
+    }
+    function closeProfilePanel() {
+        document.getElementById('profilePanelContainer').innerHTML = '';
+    }
+</script>

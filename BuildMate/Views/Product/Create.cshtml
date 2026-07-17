@@ -1,0 +1,229 @@
+﻿@model Buildmate.Models.Product
+@{
+    Layout = null;
+}
+
+<div class="wizard-overlay-side">
+    <div class="wizard-panel">
+        <div class="wizard-header">
+            <div>
+                <h3>Add New Product</h3>
+                <p>Add product details in 3 simple steps.</p>
+            </div>
+            <a href="#" onclick="closeProductPanel(); return false;" class="wizard-close">&times;</a>
+        </div>
+
+        <!-- STEPPER -->
+        <div class="stepper">
+            <div class="step-item active" data-step="1">
+                <div class="step-circle">1</div>
+                <span>Basic<br />Information</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step-item" data-step="2">
+                <div class="step-circle">2</div>
+                <span>Pricing &<br />Inventory</span>
+            </div>
+            <div class="step-line"></div>
+            <div class="step-item" data-step="3">
+                <div class="step-circle">3</div>
+                <span>Media &<br />Details</span>
+            </div>
+        </div>
+
+        <form asp-action="Create" method="post" id="productForm">
+            <!-- STEP 1 -->
+            <div class="wizard-step active" data-step-content="1">
+                <div class="wizard-section">
+                    <h4>Basic Information</h4>
+                    <p class="section-sub">Enter the basic details about your product.</p>
+
+                    <div class="form-group full-width">
+                        <label>Product Name <span class="req">*</span></label>
+                        <input asp-for="Name" class="form-input" placeholder="Enter product name" required />
+                    </div>
+                    <div class="form-group full-width">
+                        <label>SKU / Product Code <span class="req">*</span></label>
+                        <input asp-for="Sku" class="form-input" placeholder="Enter SKU or product code" required />
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Category <span class="req">*</span></label>
+                        <select asp-for="Category" class="form-input">
+                            <option value="">Select category</option>
+                            <option value="Cement">Cement</option>
+                            <option value="Steel">Steel</option>
+                            <option value="Electrical">Electrical</option>
+                            <option value="Plumbing">Plumbing</option>
+                            <option value="Roofing">Roofing</option>
+                            <option value="Insulation">Insulation</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Sub Category <span class="req">*</span></label>
+                        <select asp-for="SubCategory" class="form-input">
+                            <option value="">Select sub category</option>
+                            <option value="Portland Cement">Portland Cement</option>
+                            <option value="Fiberglass">Fiberglass</option>
+                            <option value="PVC">PVC</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Unit of Measurement <span class="req">*</span></label>
+                        <select asp-for="Unit" class="form-input">
+                            <option value="">Select unit</option>
+                            <option value="Bag (50kg)">Bag (50kg)</option>
+                            <option value="Piece">Piece</option>
+                            <option value="Roll">Roll</option>
+                            <option value="Meter">Meter</option>
+                            <option value="Sheet">Sheet</option>
+                            <option value="Box">Box</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Short Description</label>
+                        <textarea asp-for="Description" class="form-input" maxlength="200" rows="3" placeholder="Brief description about the product"></textarea>
+                    </div>
+                </div>
+
+                <div class="wizard-footer">
+                    <a href="#" onclick="closeProductPanel(); return false;" class="btn-clear">Cancel</a>                    <button type="button" class="btn-apply" onclick="goToStep(2)">Next →</button>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="wizard-step" data-step-content="2">
+                <div class="wizard-section">
+                    <h4>Pricing Information</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Base Price (₱) <span class="req">*</span></label>
+                            <input asp-for="Price" type="number" step="0.01" class="form-input" required />
+                        </div>
+                        <div class="form-group">
+                            <label>MOQ</label>
+                            <input asp-for="Moq" type="number" class="form-input" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Tax</label>
+                            <select asp-for="Tax" class="form-input">
+                                <option value="VAT (12%)">VAT (12%)</option>
+                                <option value="Exempt">Exempt</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Price is</label>
+                            <div class="toggle-group">
+                                <label class="toggle-option">
+                                    <input type="radio" name="IsTaxInclusive" value="true" checked /> Tax Inclusive
+                                </label>
+                                <label class="toggle-option">
+                                    <input type="radio" name="IsTaxInclusive" value="false" /> Tax Exclusive
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wizard-section">
+                    <h4>Inventory Information</h4>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Current Stock</label>
+                            <input asp-for="CurrentStock" type="number" class="form-input" />
+                        </div>
+                        <div class="form-group">
+                            <label>Low Stock Alert</label>
+                            <input asp-for="LowStockAlert" type="number" class="form-input" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Lead Time (Days)</label>
+                            <input asp-for="LeadTime" class="form-input" placeholder="e.g. 3-5 days" />
+                        </div>
+                        <div class="form-group">
+                            <label>Storage Location</label>
+                            <input asp-for="StorageLocation" class="form-input" placeholder="e.g. Main Warehouse" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="wizard-footer">
+                    <button type="button" class="btn-clear" onclick="goToStep(1)">Back</button>
+                    <button type="button" class="btn-apply" onclick="goToStep(3)">Next →</button>
+                </div>
+            </div>
+
+            <!-- STEP 3 -->
+            <div class="wizard-step" data-step-content="3">
+                <div class="wizard-section">
+                    <h4>Product Images</h4>
+                    <p class="section-sub">Upload clear images of your product (preview only).</p>
+                    <div class="image-upload-row" id="imagePreviewRow">
+                        <label class="image-add-box" id="addImageBox">
+                            <input type="file" id="imageInput" accept="image/*" style="display:none;" onchange="previewImage(event)" />
+                            <span>+ Add Image</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="wizard-section">
+                    <h4>Product Details</h4>
+                    <label>Key Features (Optional)</label>
+                    <div class="tag-input-wrapper" id="tagWrapper">
+                        <input type="text" id="tagInput" placeholder="Type and press Enter" onkeydown="addTag(event)" />
+                    </div>
+                </div>
+
+                <div class="wizard-footer">
+                    <button type="button" class="btn-clear" onclick="goToStep(2)">Back</button>
+                    <button type="submit" class="btn-apply">Save Product</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function goToStep(stepNum) {
+        document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+        document.querySelector(`.wizard-step[data-step-content="${stepNum}"]`).classList.add('active');
+        document.querySelectorAll('.step-item').forEach(el => {
+            const n = parseInt(el.dataset.step);
+            el.classList.toggle('active', n <= stepNum);
+        });
+    }
+    function addTag(e) {
+        if (e.key === 'Enter' && e.target.value.trim() !== '') {
+            e.preventDefault();
+            const wrapper = document.getElementById('tagWrapper');
+            const input = document.getElementById('tagInput');
+            const chip = document.createElement('span');
+            chip.className = 'tag-chip';
+            chip.innerHTML = `${e.target.value} <input type="hidden" name="featureTags" value="${e.target.value}" /><a onclick="removeTag(this)">&times;</a>`;
+            wrapper.insertBefore(chip, input);
+            input.value = '';
+        }
+    }
+    function removeTag(el) { el.parentElement.remove(); }
+
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const row = document.getElementById('imagePreviewRow');
+            const addBox = document.getElementById('addImageBox');
+
+            const preview = document.createElement('div');
+            preview.className = 'image-preview-box';
+            preview.innerHTML = `<img src="${e.target.result}" /><span class="remove-img" onclick="this.parentElement.remove()">&times;</span>`;
+
+            row.insertBefore(preview, addBox);
+        };
+        reader.readAsDataURL(file);
+    }
+</script>

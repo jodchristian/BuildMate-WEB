@@ -1,0 +1,105 @@
+﻿@model Buildmate.Models.NotificationListViewModel
+@{
+    ViewData["Title"] = "Notifications";
+    Layout = "_Layout";
+}
+
+<div class="page-header-row">
+    <div>
+        <h2 class="page-title">Notifications</h2>
+        <p class="page-subtitle">Stay updated with important activities and announcements.</p>
+    </div>
+    <div class="header-btn-group">
+        <form asp-action="MarkAllRead" method="post" style="display:inline;">
+            <button type="submit" class="btn-outline-orange">Mark all as read</button>
+        </form>
+        <button class="btn-outline-orange"><i class="bi bi-funnel"></i> More Filters</button>
+    </div>
+</div>
+
+<div class="notif-layout">
+    <!-- LEFT SIDEBAR FILTERS -->
+    <div>
+        <div class="panel notif-filter-panel">
+            <a href="@Url.Action("Index", new { filter = "All" })" class="notif-filter-item @(Model.CurrentFilter == "All" ? "active" : "")">
+                <span>All Notifications</span>
+                <span class="notif-count">@Model.AllCount</span>
+            </a>
+            <a href="@Url.Action("Index", new { filter = "Unread" })" class="notif-filter-item @(Model.CurrentFilter == "Unread" ? "active" : "")">
+                <span>Unread</span>
+                <span class="notif-count">@Model.UnreadCount</span>
+            </a>
+            <a href="@Url.Action("Index", new { filter = "Orders & Shipments" })" class="notif-filter-item @(Model.CurrentFilter == "Orders & Shipments" ? "active" : "")">
+                <span>Orders & Shipments</span>
+                <span class="notif-count">@Model.OrdersCount</span>
+            </a>
+            <a href="@Url.Action("Index", new { filter = "RFQ & Quotations" })" class="notif-filter-item @(Model.CurrentFilter == "RFQ & Quotations" ? "active" : "")">
+                <span>RFQ & Quotations</span>
+                <span class="notif-count">@Model.RfqCount</span>
+            </a>
+            <a href="@Url.Action("Index", new { filter = "Payments & Invoices" })" class="notif-filter-item @(Model.CurrentFilter == "Payments & Invoices" ? "active" : "")">
+                <span>Payments & Invoices</span>
+                <span class="notif-count">@Model.PaymentsCount</span>
+            </a>
+            <a href="@Url.Action("Index", new { filter = "System Updates" })" class="notif-filter-item @(Model.CurrentFilter == "System Updates" ? "active" : "")">
+                <span>System Updates</span>
+                <span class="notif-count">@Model.SystemCount</span>
+            </a>
+        </div>
+
+        <div class="panel notif-pref-card">
+            <div class="notif-pref-header"><i class="bi bi-gear"></i> <strong>Notification Preferences</strong></div>
+            <p class="muted">Customize how and when you receive notifications.</p>
+            <button class="btn-clear" style="width:100%;">Manage Preferences</button>
+        </div>
+    </div>
+
+    <!-- RIGHT: NOTIFICATION LIST -->
+    <div class="panel">
+        @foreach (var group in Model.Groups)
+        {
+            <div class="notif-date-label">@group.DateLabel</div>
+            @foreach (var n in group.Items)
+            {
+                <div class="notif-row">
+                    <div class="notif-icon @n.IconType">
+                        @if (n.IconType == "rfq")
+                        {
+                            <i class="bi bi-file-earmark-text"></i>
+                        }
+                        else if (n.IconType == "order")
+                        {
+                            <i class="bi bi-truck"></i>
+                        }
+                        else if (n.IconType == "payment")
+                        {
+                            <i class="bi bi-cash-coin"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-gear-fill"></i>
+                        }
+                    </div>
+                    <div class="notif-content">
+                        <strong>@n.Title</strong>
+                        <p>@n.Description</p>
+                        @if (!string.IsNullOrEmpty(n.Tag))
+                        {
+                            <span class="notif-tag">@n.Tag</span>
+                        }
+                    </div>
+                    <div class="notif-meta">
+                        <small>@n.Timestamp.ToString("h:mm tt")</small>
+                        @if (!n.IsRead)
+                        {
+                            <span class="unread-dot"></span>
+                        }
+                        <i class="bi bi-three-dots-vertical notif-more"></i>
+                    </div>
+                </div>
+            }
+        }
+
+        <div class="table-footer">Showing @Model.ShowingCount to @Model.TotalCount of @Model.AllCount notifications.</div>
+    </div>
+</div>

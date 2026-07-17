@@ -1,0 +1,152 @@
+﻿@model Buildmate.Models.OrderListViewModel
+@{
+    ViewData["Title"] = "Orders";
+    Layout = "_Layout";
+}
+
+<h2 class="page-title">Order Management</h2>
+<p class="page-subtitle">Manage and track all customer orders in one place.</p>
+
+<!-- STAT CARDS -->
+<div class="stat-cards">
+    <div class="stat-card blue">
+        <div>
+            <small>Total Orders</small>
+            <h3>@Model.TotalOrders</h3>
+            <span>All time</span>
+        </div>
+        <div class="stat-icon-wrapper"><img src="~/images/totalorders.png" /></div>
+    </div>
+    <div class="stat-card yellow">
+        <div>
+            <small>To Confirm</small>
+            <h3>@Model.ToConfirmCount</h3>
+            <span>Awaiting Confirmation</span>
+        </div>
+        <div class="stat-icon-wrapper"><img src="~/images/toconfirms.png" /></div>
+    </div>
+    <div class="stat-card green">
+        <div>
+            <small>In Transit</small>
+            <h3>@Model.InTransitCount</h3>
+            <span>On the way</span>
+        </div>
+        <div class="stat-icon-wrapper"><img src="~/images/intransit.png" /></div>
+    </div>
+    <div class="stat-card purple">
+        <div>
+            <small>Delivered</small>
+            <h3>@Model.DeliveredCount</h3>
+            <span>Completed</span>
+        </div>
+        <div class="stat-icon-wrapper"><img src="~/images/delivered.png" /></div>
+    </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="panel filter-panel">
+    <form method="get" asp-action="Index" class="filter-form">
+        <input type="hidden" name="tab" value="@Model.CurrentTab" />
+        <div class="search-wrapper">
+            <div class="search-box">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" name="search" value="@Model.SearchTerm" placeholder="Search by order no. or buyer..." />
+            </div>
+        </div>
+        <div class="filter-group">
+            <label>Status</label>
+            <select name="status">
+                <option value="">All Status</option>
+                <option value="To Confirm" selected="@(Model.StatusFilter == "To Confirm")">To Confirm</option>
+                <option value="To Ship" selected="@(Model.StatusFilter == "To Ship")">To Ship</option>
+                <option value="In Transit" selected="@(Model.StatusFilter == "In Transit")">In Transit</option>
+                <option value="Delivered" selected="@(Model.StatusFilter == "Delivered")">Delivered</option>
+                <option value="Cancelled" selected="@(Model.StatusFilter == "Cancelled")">Cancelled</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Project</label>
+            <select name="project">
+                <option value="">All Projects</option>
+                <option value="Skylane Residences" selected="@(Model.ProjectFilter == "Skylane Residences")">Skylane Residences</option>
+                <option value="Office Tower Manila" selected="@(Model.ProjectFilter == "Office Tower Manila")">Office Tower Manila</option>
+                <option value="Warehouse Complex" selected="@(Model.ProjectFilter == "Warehouse Complex")">Warehouse Complex</option>
+                <option value="Riverside Condominiums" selected="@(Model.ProjectFilter == "Riverside Condominiums")">Riverside Condominiums</option>
+            </select>
+        </div>
+        <a href="/Order/Index" class="btn-clear">Clear</a>
+        <button type="submit" class="btn-apply">Apply Filters</button>
+    </form>
+</div>
+
+<!-- TABLE PANEL -->
+<div class="panel">
+    <div class="tabs">
+        <a href="@Url.Action("Index", new { tab = "All" })" class="tab @(Model.CurrentTab == "All" ? "active" : "")">All Orders (@Model.TotalOrders)</a>
+        <a href="@Url.Action("Index", new { tab = "To Confirm" })" class="tab @(Model.CurrentTab == "To Confirm" ? "active" : "")">To Confirm (@Model.ToConfirmCount)</a>
+        <a href="@Url.Action("Index", new { tab = "To Ship" })" class="tab @(Model.CurrentTab == "To Ship" ? "active" : "")">To Ship (@Model.ToShipCount)</a>
+        <a href="@Url.Action("Index", new { tab = "In Transit" })" class="tab @(Model.CurrentTab == "In Transit" ? "active" : "")">In Transit (@Model.InTransitCount)</a>
+        <a href="@Url.Action("Index", new { tab = "Delivered" })" class="tab @(Model.CurrentTab == "Delivered" ? "active" : "")">Delivered (@Model.DeliveredCount)</a>
+        <a href="@Url.Action("Index", new { tab = "Cancelled" })" class="tab @(Model.CurrentTab == "Cancelled" ? "active" : "")">Cancelled (@Model.CancelledCount)</a>
+    </div>
+
+    <table class="rfq-table full-table">
+        <thead>
+            <tr>
+                <th>Order No.</th>
+                <th>Project / Buyer</th>
+                <th>Order Date</th>
+                <th>Total Amount</th>
+                <th>Items</th>
+                <th>Status</th>
+                <th>Expected Delivery</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var order in Model.Orders)
+            {
+                <tr>
+                    <td>
+                        <strong>@order.OrderNumber</strong><br />
+                        <small class="muted">Active Order</small>
+                    </td>
+                    <td>
+                        @order.ProjectName<br />
+                        <small class="muted">@order.BuyerName</small>
+                    </td>
+                    <td>
+                        @order.OrderDate.ToString("dd MMM yyyy")<br />
+                        <small class="muted">@order.OrderDate.ToString("h:mm tt")</small>
+                    </td>
+                    <td>₱@order.Amount.ToString("N2")</td>
+                    <td>@order.ItemsCount</td>
+                    <td>
+                        <span class="badge-status @order.Status.Replace(" ", "").ToLower()">@order.Status</span>
+                    </td>
+                    <td>
+                        @order.ExpectedDelivery.ToString("dd MMM yyyy")<br />
+                        <small class="days-left">@order.DeliveryStatusText</small>
+                    </td>
+                    <td>
+                        <a href="@Url.Action("Details", new { id = order.Id })" class="btn-details">View Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="table-footer-row">
+        <span>Showing @(((Model.CurrentPage - 1) * Model.PageSize) + 1) to @(Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalFilteredCount)) of @Model.TotalFilteredCount orders</span>
+
+        <div class="pagination">
+            <a href="@Url.Action("Index", new { tab = Model.CurrentTab, search = Model.SearchTerm, status = Model.StatusFilter, project = Model.ProjectFilter, page = 1 })" class="page-btn">«</a>
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <a href="@Url.Action("Index", new { tab = Model.CurrentTab, search = Model.SearchTerm, status = Model.StatusFilter, project = Model.ProjectFilter, page = i })"
+                   class="page-btn @(i == Model.CurrentPage ? "active" : "")">@i</a>
+            }
+            <a href="@Url.Action("Index", new { tab = Model.CurrentTab, search = Model.SearchTerm, status = Model.StatusFilter, project = Model.ProjectFilter, page = Model.TotalPages })" class="page-btn">»</a>
+        </div>
+    </div>
+</div>

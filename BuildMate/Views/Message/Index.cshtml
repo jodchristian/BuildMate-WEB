@@ -1,0 +1,69 @@
+﻿@model Buildmate.Models.MessageListViewModel
+@{
+    ViewData["Title"] = "Messages";
+    Layout = "_Layout";
+}
+
+<a href="#" onclick="history.back(); return false;" class="back-link">
+    <i class="bi bi-arrow-left"></i> Back
+</a>
+
+<h2 class="page-title">Messages</h2>
+<p class="page-subtitle">Communicate with your team, suppliers, and partners.</p>
+
+<div class="panel filter-panel">
+    <form method="get" asp-action="Index" class="filter-form">
+        <input type="hidden" name="filter" value="@Model.CurrentFilter" />
+        <div class="search-wrapper" style="max-width:100%; flex:1;">
+            <div class="search-box">
+                <i class="bi bi-search search-icon"></i>
+                <input type="text" name="search" value="@Model.SearchTerm" placeholder="Search messages..." onchange="this.form.submit()" />
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="panel">
+    <div class="tabs" style="margin-bottom:4px;">
+        <a href="@Url.Action("Index", new { filter = "All", search = Model.SearchTerm })" class="tab @(Model.CurrentFilter == "All" ? "active" : "")">All (@Model.AllCount)</a>
+        <a href="@Url.Action("Index", new { filter = "Unread", search = Model.SearchTerm })" class="tab @(Model.CurrentFilter == "Unread" ? "active" : "")">Unread (@Model.UnreadCount)</a>
+        <a href="@Url.Action("Index", new { filter = "Projects", search = Model.SearchTerm })" class="tab @(Model.CurrentFilter == "Projects" ? "active" : "")">Projects (@Model.ProjectsCount)</a>
+        <a href="@Url.Action("Index", new { filter = "Suppliers", search = Model.SearchTerm })" class="tab @(Model.CurrentFilter == "Suppliers" ? "active" : "")">Suppliers (@Model.SuppliersCount)</a>
+    </div>
+
+    <div class="message-list">
+        @foreach (var msg in Model.Threads)
+        {
+            <a href="@Url.Action("Chat", new { id = msg.Id })" class="message-row @(msg.IsUnread ? "unread" : "")">
+                <div class="message-avatar" style="background:@msg.AvatarColor;">
+                    @msg.SenderInitials
+                    @if (msg.IsOnline)
+                    {
+                        <span class="online-dot"></span>
+                    }
+                </div>
+                <div class="message-content">
+                    <div class="message-top-row">
+                        <strong>@msg.SenderName</strong>
+                        <small class="message-time">@msg.LastMessageTime.ToString("h:mm tt")</small>
+                    </div>
+                    <span class="message-order-tag">@msg.RelatedOrder</span>
+                    <p>@msg.LastMessage</p>
+                </div>
+                @if (msg.IsUnread)
+                {
+                    <span class="msg-unread-dot"></span>
+                }
+                else
+                {
+                    <i class="bi bi-chevron-right message-chevron"></i>
+                }
+            </a>
+        }
+    </div>
+
+    @if (!Model.Threads.Any())
+    {
+        <p style="color:#9ca3af; text-align:center; padding:30px 0;">No messages found.</p>
+    }
+</div>

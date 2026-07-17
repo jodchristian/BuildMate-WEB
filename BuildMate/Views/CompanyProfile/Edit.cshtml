@@ -1,0 +1,103 @@
+﻿@model Buildmate.Models.CompanyProfile
+@{
+    Layout = null;
+}
+
+<div class="wizard-overlay-side">
+    <div class="wizard-panel">
+        <div class="wizard-header">
+            <div><h3>Edit Company Profile</h3></div>
+            <a href="#" onclick="closeProfilePanel(); return false;" class="wizard-close">&times;</a>
+        </div>
+
+        <form asp-action="Edit" asp-controller="CompanyProfile" method="post">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="wizard-section">
+                <h4>Basic Info</h4>
+                <div class="form-group full-width">
+                    <label>Company Name</label>
+                    <input asp-for="CompanyName" class="form-input" />
+                </div>
+                <div class="form-group full-width">
+                    <label>Short Description</label>
+                    <textarea asp-for="ShortDescription" class="form-input" rows="2"></textarea>
+                </div>
+                <div class="form-group full-width">
+                    <label>Address</label>
+                    <input asp-for="Address" class="form-input" />
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input asp-for="Phone" class="form-input" />
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input asp-for="Email" class="form-input" />
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label>Website</label>
+                    <input asp-for="Website" class="form-input" />
+                </div>
+            </div>
+
+            <div class="wizard-section">
+                <h4>Company Information</h4>
+                <div class="form-group full-width">
+                    <label>About Company</label>
+                    <textarea asp-for="AboutCompany" class="form-input" rows="3"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Business Type</label>
+                        <input asp-for="BusinessType" class="form-input" />
+                    </div>
+                    <div class="form-group">
+                        <label>Year Established</label>
+                        <input asp-for="YearEstablished" type="number" class="form-input" />
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label>Company Size</label>
+                    <input asp-for="CompanySize" class="form-input" />
+                </div>
+                <div class="form-group full-width">
+                    <label>Main Categories</label>
+                    <div class="tag-input-wrapper" id="tagWrapper">
+                        @foreach (var cat in Model.MainCategoriesList)
+                        {
+                            <span class="tag-chip">@cat <input type="hidden" name="categoryTags" value="@cat" /><a onclick="this.parentElement.remove()">&times;</a></span>
+                        }
+                        <input type="text" id="tagInput" placeholder="Type and press Enter" onkeydown="addCatTag(event)" />
+                    </div>
+                </div>
+                <div class="form-group full-width">
+                    <label>Service Areas</label>
+                    <input asp-for="ServiceAreas" class="form-input" />
+                </div>
+            </div>
+
+            <div class="wizard-footer">
+                <a href="#" onclick="closeProfilePanel(); return false;" class="btn-clear">Cancel</a>
+                <button type="submit" class="btn-apply">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function addCatTag(e) {
+        if (e.key === 'Enter' && e.target.value.trim() !== '') {
+            e.preventDefault();
+            const wrapper = document.getElementById('tagWrapper');
+            const input = document.getElementById('tagInput');
+            const chip = document.createElement('span');
+            chip.className = 'tag-chip';
+            chip.innerHTML = `${e.target.value} <input type="hidden" name="categoryTags" value="${e.target.value}" /><a onclick="this.parentElement.remove()">&times;</a>`;
+            wrapper.insertBefore(chip, input);
+            input.value = '';
+        }
+    }
+</script>

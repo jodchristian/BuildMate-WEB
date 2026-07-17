@@ -1,0 +1,158 @@
+﻿@model Buildmate.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "_Layout";
+}
+
+<h2 class="page-title">Welcome, BuildWell Enterprises</h2>
+<p class="page-subtitle">Here's what's happening with your business today.</p>
+
+<!-- STAT CARDS -->
+<!-- STAT CARDS -->
+<div class="stat-cards">
+    <div class="stat-card orange">
+        <div>
+            <small>RFQ Requests</small>
+            <h3>@Model.NewRfqRequests</h3>
+            <span>New requests</span>
+        </div>
+        <img src="~/images/newreq.png" class="stat-icon-img" />
+        <a href="#">View all RFQs →</a>
+    </div>
+    <div class="stat-card yellow">
+        <div>
+            <small>Quotations Sent</small>
+            <h3>@Model.QuotationsSentThisMonth</h3>
+            <span>This month</span>
+        </div>
+        <img src="~/images/quotsent.png" class="stat-icon-img" />
+        <a href="#">View all quotations →</a>
+    </div>
+    <div class="stat-card green">
+        <div>
+            <small>Orders Received</small>
+            <h3>@Model.OrdersReceivedThisMonth</h3>
+            <span>This month</span>
+        </div>
+        <img src="~/images/orderreceive.png" class="stat-icon-img" />
+        <a href="@Url.Action("Index", "Order")">View all orders →</a>
+    </div>
+    <div class="stat-card purple">
+        <div>
+            <small>Total Sales</small>
+            <h3>@Model.TotalSalesThisMonth.ToString("N0")</h3>
+            <span>This month</span>
+        </div>
+        <img src="~/images/totalsales.png" class="stat-icon-img" />
+        <a href="#">View sales report →</a>
+    </div>
+</div>
+
+<div class="row-grid">
+    <!-- RFQ REQUESTS TABLE -->
+    <div class="panel">
+        <div class="panel-header">
+            <h4>RFQ Requests</h4>
+            <a href="@Url.Action("Index", "Rfq")">View all →</a>
+        </div>
+        <div class="tabs">
+            <a href="@Url.Action("Index", "Dashboard", new { rfqTab = "New" })" class="tab @(Model.CurrentRfqTab == "New" ? "active" : "")">New (@Model.NewCount)</a>
+            <a href="@Url.Action("Index", "Dashboard", new { rfqTab = "Responded" })" class="tab @(Model.CurrentRfqTab == "Responded" ? "active" : "")">Responded (@Model.RespondedCount)</a>
+            <a href="@Url.Action("Index", "Dashboard", new { rfqTab = "Closed" })" class="tab @(Model.CurrentRfqTab == "Closed" ? "active" : "")">Closed (@Model.ClosedCount)</a>
+        </div>
+        <table class="rfq-table">
+            <thead>
+                <tr><th>RFQ Title</th><th>Buyer</th><th>Valid Till</th><th>Items</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                @foreach (var rfq in Model.RecentRfqRequests)
+                {
+                    <tr>
+                        <td>@rfq.Title</td>
+                        <td>@rfq.Buyer</td>
+                        <td>@rfq.ValidTill.ToString("dd MMM yyyy")</td>
+                        <td>@rfq.ItemsCount</td>
+                        <td><a href="@Url.Action("Details", "Rfq", new { id = rfq.Id })" class="btn-view">View RFQ</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        @if (!Model.RecentRfqRequests.Any())
+        {
+            <p style="color:#9ca3af; padding: 16px 0; text-align:center;">No @Model.CurrentRfqTab.ToLower() RFQs found.</p>
+        }
+    </div>
+
+    <!-- QUOTATION STATUS -->
+    <div class="panel">
+        <div class="panel-header">
+            <h4>Quotation Status</h4>
+            <span>This month</span>
+        </div>
+        <canvas id="quotationChart" height="180"></canvas>
+        <div class="legend">
+            <span><i class="dot green"></i> Accepted @Model.AcceptedQuotations</span>
+            <span><i class="dot blue"></i> Pending @Model.PendingQuotations</span>
+            <span><i class="dot gray"></i> Declined @Model.DeclinedQuotations</span>
+        </div>
+    </div>
+</div>
+
+<div class="row-grid">
+    <!-- ORDER OVERVIEW -->
+    <div class="panel">
+        <div class="panel-header">
+            <h4>Order Overview</h4>
+            <span>This month</span>
+        </div>
+        <div class="order-overview">
+            <div><h3>@Model.TotalOrders</h3><small>Total Orders</small></div>
+            <div><h3 class="pending">@Model.PendingOrders</h3><small>Pending</small></div>
+            <div><h3 class="processing">@Model.ProcessingOrders</h3><small>Processing</small></div>
+            <div><h3 class="shipped">@Model.ShippedOrders</h3><small>Shipped</small></div>
+            <div><h3 class="delivered">@Model.DeliveredOrders</h3><small>Delivered</small></div>
+        </div>
+        <a href="@Url.Action("Index", "Order")">View all orders →</a>
+    </div>
+
+    <!-- RECENT ACTIVITY -->
+    <div class="panel">
+        <div class="panel-header">
+            <h4>Recent Activity</h4>
+            <a href="#">View all →</a>
+        </div>
+        <ul class="activity-list">
+            @foreach (var a in Model.RecentActivities)
+            {
+                <li>
+                    <i class="bi bi-check-circle"></i>
+                    <div>
+                        <strong>@a.Title</strong>
+                        <p>@a.Description</p>
+                    </div>
+                    <small>@a.Timestamp.ToString("dd MMM yyyy, h:mm tt")</small>
+                </li>
+            }
+        </ul>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        new Chart(document.getElementById('quotationChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Accepted', 'Pending', 'Declined'],
+                datasets: [{
+                    data: [@Model.AcceptedQuotations, @Model.PendingQuotations, @Model.DeclinedQuotations],
+                    backgroundColor: ['#22c55e', '#3b82f6', '#d1d5db'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                cutout: '70%',
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+}

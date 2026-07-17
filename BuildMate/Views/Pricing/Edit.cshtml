@@ -1,0 +1,124 @@
+﻿@using System.Text.Json
+@model Buildmate.Models.Product
+@{
+    Layout = null;
+    var tiers = string.IsNullOrWhiteSpace(Model.BulkDiscountsJson)
+        ? new List<Buildmate.Models.BulkDiscountTier>()
+        : JsonSerializer.Deserialize<List<Buildmate.Models.BulkDiscountTier>>(Model.BulkDiscountsJson);
+    if (tiers == null || tiers.Count == 0)
+    {
+        tiers = new List<Buildmate.Models.BulkDiscountTier>
+        {
+            new() { MinQuantity = 1, MaxQuantity = "49", Discount = 0 },
+            new() { MinQuantity = 50, MaxQuantity = "99", Discount = 2 },
+            new() { MinQuantity = 100, MaxQuantity = "199", Discount = 5 },
+            new() { MinQuantity = 200, MaxQuantity = "499", Discount = 7.5m },
+            new() { MinQuantity = 500, MaxQuantity = "Above", Discount = 10 }
+        };
+    }
+}
+
+<div class="wizard-overlay-side">
+    <div class="wizard-panel">
+        <div class="wizard-header">
+            <div>
+                <h3>Edit Pricing & Discounts</h3>
+            </div>
+            <a href="#" onclick="closePricingPanel(); return false;" class="wizard-close">&times;</a>
+        </div>
+
+        <div class="pricing-product-header">
+            <img src="~/images/@Model.ImageFile" class="pricing-product-img" />
+            <div>
+                <strong>@Model.Name</strong>
+                <p>@Model.Sku | @Model.Category | @Model.Unit</p>
+            </div>
+        </div>
+
+        <form asp-action="Edit" asp-controller="Pricing" method="post" id="pricingForm">
+            <input type="hidden" name="Id" value="@Model.Id" />
+
+            <div class="wizard-section">
+                <h4>Pricing Details</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Base Price <span class="req">*</span></label>
+                        <input name="Price" type="number" step="0.01" value="@Model.Price" class="form-input" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Effective From <span class="req">*</span></label>
+                        <input name="EffectiveFrom" type="date" value="@(Model.EffectiveFrom?.ToString("yyyy-MM-dd") ?? DateTime.Now.ToString("yyyy-MM-dd"))" class="form-input" required />
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-section">
+                <h4>Bulk Discounts</h4>
+                <p class="section-sub">Set quantity based discounts for this product.</p>
+                <table class="tier-table" id="tierTable">
+                    <thead>
+                        <tr><th>Min Quantity</th><th>Max Quantity</th><th>Discount (%)</th><th>Action</th></tr>
+                    </thead>
+                    <tbody id="tierTableBody">
+                        @foreach (var t in tiers)
+                        {
+                            <tr>
+                                <td><input type="number" name="tierMin" value="@t.MinQuantity" class="form-input" /></td>
+                                <td><input type="text" name="tierMax" value="@t.MaxQuantity" class="form-input" /></td>
+                                <td><input type="number" step="0.1" name="tierDiscount" value="@t.Discount" class="form-input" /></td>
+                                <td><a href="#" onclick="this.closest('tr').remove(); return false;" class="tier-delete"><i class="bi bi-trash"></i></a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+                <a href="#" onclick="addTierRow(); return false;" class="add-tier-link">+ Add Discount Tier</a>
+            </div>
+
+            <div class="wizard-section">
+                <h4>Other Settings</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price List</label>
+                        <select name="PriceList" class="form-input">
+                            <option value="Standard Price List" selected="@(Model.PriceList == "Standard Price List")">Standard Price List</option>
+                            <option value="Wholesale Price List" selected="@(Model.PriceList == "Wholesale Price List")">Wholesale Price List</option>
+                            <option value="Contractor Price List" selected="@(Model.PriceList == "Contractor Price List")">Contractor Price List</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="Status" class="form-input">
+                            <option value="Active" selected="@(Model.Status == "Active")">Active</option>
+                            <option value="Inactive" selected="@(Model.Status == "Inactive")">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-footer">
+                <a href="#" onclick="closePricingPanel(); return false;" class="btn-clear">Cancel</a>
+                <button type="submit" class="btn-apply">Save Changes</button>
+            </div>
+        </form>
+
+        <div class="help-callout">
+            <p>Need help with pricing?</p>
+            <small>Learn how to set effective pricing and discounts.</small>
+            <a href="#">View Pricing Guide</a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addTierRow() {
+        const tbody = document.getElementById('tierTableBody');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><input type="number" name="tierMin" class="form-input" /></td>
+            <td><input type="text" name="tierMax" class="form-input" /></td>
+            <td><input type="number" step="0.1" name="tierDiscount" class="form-input" /></td>
+            <td><a href="#" onclick="this.closest('tr').remove(); return false;" class="tier-delete"><i class="bi bi-trash"></i></a></td>
+        `;
+        tbody.appendChild(row);
+    }
+</script>
