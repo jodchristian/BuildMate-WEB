@@ -16,4 +16,4 @@ WORKDIR /app
 COPY --from=build /app/out ./
 
 # Replace "YourApp.dll" with your actual assembly output name (e.g., BuildMate-WEB.dll)
-ENTRYPOINT ["dotnet", "BuildMate-WEB.dll"]
+ENTRYPOINT ["dotnet", "BuildMate.dll"]
