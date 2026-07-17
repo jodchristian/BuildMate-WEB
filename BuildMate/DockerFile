@@ -2,18 +2,19 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /app
 
-# Copy the csproj from your specific subfolder and restore dependencies
-COPY BuildMate-WEB/*.csproj ./
-RUN dotnet restore
+# Copy the csproj into a matching subfolder and restore
+COPY BuildMate-WEB/*.csproj ./BuildMate-WEB/
+RUN dotnet restore BuildMate-WEB/*.csproj
 
-# Copy all code and build the release
-COPY BuildMate-WEB/ ./
-RUN dotnet publish -c Release -o out
+# Copy the rest of the files into the subfolder
+COPY BuildMate-WEB/ ./BuildMate-WEB/
+
+# Publish from the subdirectory
+RUN dotnet publish BuildMate-WEB/*.csproj -c Release -o out
 
 # 2. Runtime Stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 COPY --from=build /app/out ./
 
-# Replace "YourApp.dll" with your actual assembly output name (e.g., BuildMate-WEB.dll)
 ENTRYPOINT ["dotnet", "BuildMate.dll"]
