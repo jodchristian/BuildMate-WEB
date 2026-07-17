@@ -7,7 +7,7 @@ COPY BuildMate/*.csproj ./BuildMate/
 RUN dotnet restore BuildMate/*.csproj
 
 # Copy the rest of the files into the subfolder
-COPY BuildMate-WEB/ ./BuildMate/
+COPY BuildMate/ ./BuildMate/
 
 # Publish from the subdirectory
 RUN dotnet publish BuildMate/*.csproj -c Release -o out
